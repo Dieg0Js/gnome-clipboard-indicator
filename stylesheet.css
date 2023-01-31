@@ -1,0 +1,29 @@
+.panelmenu-button {
+    max-width: 600px;
+}
+
+.popupsearchmenuitem {
+    border-radius: 18px;
+    min-width: 300px;
+    padding: 7px 12px;
+}
+
+.popuphistorymenusection {
+    max-height: 500px;
+}
+
+.placeholderpanel {
+    spacing: 4px;
+}
+
+.toolbuttonnpanel {
+    spacing: 10px;
+}
+
+.toolbutton .system-status-icon {
+    icon-size: 16px;
+}
+
+.qr-icon {
+    icon-size: 10px;
+}

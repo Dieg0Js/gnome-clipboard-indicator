@@ -1,0 +1,12 @@
+{
+  "name": "Clipboard Indicator",
+  "description": "A minimal clipboard indicator for the gnome shell. Fork of Clipman by popov895.",
+  "uuid": "clipboard-indicator@Dieg0Js.github.io",
+  "original-authors": "Dieg0Js",
+  "url": "https://github.com/Dieg0Js/gnome-clipboard-indicator",
+  "shell-version": [
+    "42",
+    "43"
+  ],
+  "version": 1
+}
