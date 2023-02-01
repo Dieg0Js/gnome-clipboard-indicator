@@ -1,3 +1,11 @@
+/*
+ * @Dieg0Js - 2023
+ * https://github.com/Dieg0Js/gnome-clipboard-indicator
+ *
+ * Fork of Clipman from popov895
+ * https://github.com/popov895/Clipman
+ */
+
 "use strict";
 
 const { Clutter, Cogl, Gio, GLib, GObject, Meta, Pango, Shell, St } =
