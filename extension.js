@@ -267,15 +267,12 @@ const PanelIndicator = GObject.registerClass(
                 let updatedContents = '';
 
                 if (moveToEnd == true) {
-                    //if moveToEnd is true remove text from cache file 
-                    let oldContentsEdit = oldContents.replace(text + _splitter, "");
-                    //and append it at end of cache file
+                    //if moveToEnd is true remove text from cache file
                     //happen when selecting an item from extension panel
-                    updatedContents = oldContentsEdit.concat(text, _splitter);
-                } else {
-                    //else append to end of file
+                     oldContents = oldContents.replace(text + _splitter, "");
+                } 
+                    //append to end of file
                     updatedContents = oldContents.concat(text, _splitter);
-                }
 
                 let outputStream = file.replace(
                     null,
