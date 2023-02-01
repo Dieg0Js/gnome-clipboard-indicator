@@ -295,7 +295,7 @@ const PanelIndicator = GObject.registerClass(
                 let updatedContents = '';
 
                 if (text != null) {
-                    //if pased text is null delete everithing from cache
+                    //if passed text is null delete everything from cache
                     updatedContents = oldContents.replace(text + _splitter, "");
                 }
 
@@ -317,7 +317,6 @@ const PanelIndicator = GObject.registerClass(
             menuItem.connect("activate", () => {
                 this.menu.close();
                 this._clipboard.setText(menuItem.text);
-                //move item to beginning of cache file
                 this._storeInCache(menuItem.text, true)
             });
             menuItem.connect("destroy", () => {
