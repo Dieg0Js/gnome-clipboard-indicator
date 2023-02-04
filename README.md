@@ -16,6 +16,10 @@ When items history is greater than 15 it auto pop items also from cache.
 
 It hides completely when the Clipboard is empty.
 
+# Classic Installation
+Install the extension from the official gnome extension page:
+- https://extensions.gnome.org/extension/5721/clipboard-indicator/
+
 # Manual Installation
 Clone the repository to ~/.local/share/gnome-shell/extensions/ and restart the shell:
 
