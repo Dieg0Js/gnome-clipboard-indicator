@@ -11,7 +11,7 @@
 .popuphistorymenusection {
     max-height: 500px;
 }
-
+/*
 .placeholderpanel {
     spacing: 4px;
 }
@@ -19,11 +19,9 @@
 .toolbuttonnpanel {
     spacing: 10px;
 }
-
+*/
 .toolbutton .system-status-icon {
     icon-size: 16px;
-}
+    padding: 4px 12px 4px 12px;
 
-.qr-icon {
-    icon-size: 10px;
 }
