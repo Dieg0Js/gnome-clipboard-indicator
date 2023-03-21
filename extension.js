@@ -419,10 +419,15 @@ const PanelIndicator = GObject.registerClass(
                         if (matchedMenuItem) {
                             this._historyMenuSection.section.moveMenuItem(matchedMenuItem, 0);
                         } else {
-                            if (menuItems.length === _historySize) {
-                                this._removeFromCache(menuItems[_historySize - 1].text);
-                                this._destroyMenuItem(menuItems.pop());
+                            //delete last element when reachiing max size
+                            //delete in for loop in case of starting with a file containings more items than max size
+                            if (menuItems.length >= _historySizeMax-1) {
+                                for (let index = _historySizeMax-1; index < menuItems.length; index++) {
+                                    this._removeFromCache(menuItems[index].text);
+                                    this._destroyMenuItem(menuItems[index]);
+                                }
                             }
+                            
                             matchedMenuItem = this._createMenuItem(text);
                             this._historyMenuSection.section.addMenuItem(matchedMenuItem, 0);
                             this._storeInCache(text, false);
@@ -444,15 +449,6 @@ const PanelIndicator = GObject.registerClass(
                     this._currentMenuItem?.setOrnament(PopupMenu.Ornament.DOT);
                 }
             }
-        }
-
-        _onHistorySizeChanged() {
-            const menuItems = this._historyMenuSection.section._getMenuItems();
-            const menuItemsToRemove = menuItems.slice(_historySize);
-            menuItemsToRemove.forEach((menuItem) => {
-                this._removeFromCache(menuItem.text);
-                this._destroyMenuItem(menuItem);
-            });
         }
     }
 );
