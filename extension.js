@@ -457,7 +457,6 @@ const panelIndicator = {
     instance: null,
     state: {
         history: [],
-        privateMode: false,
     },
 };
 
