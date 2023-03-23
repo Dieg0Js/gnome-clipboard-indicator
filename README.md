@@ -1,4 +1,4 @@
-Clipboard Indicator
+# Clipboard Indicator
 
 ![screenshot_5721](https://user-images.githubusercontent.com/30718505/227160124-3615b183-c554-404e-ba8a-113f904bc5e2.png)
 
