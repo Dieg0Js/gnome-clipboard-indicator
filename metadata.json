@@ -5,8 +5,11 @@
   "original-authors": "Dieg0Js",
   "url": "https://github.com/Dieg0Js/gnome-clipboard-indicator",
   "shell-version": [
+    "40",
+    "41",
     "42",
-    "43"
+    "43",
+    "44"
   ],
   "version": 1
 }
