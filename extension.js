@@ -413,24 +413,26 @@ const PanelIndicator = GObject.registerClass(
                     //check if trimmed text is not empty (raw_text was only spaces...)
                     if (text) {
                         const menuItems = this._historyMenuSection.section._getMenuItems();
-                        matchedMenuItem = menuItems.find((menuItem) => {
-                            return menuItem.text === text;
-                        });
+                        matchedMenuItem = menuItems.find((menuItem) => 
+                             menuItem.text === text
+                        );
                         if (matchedMenuItem) {
                             this._historyMenuSection.section.moveMenuItem(matchedMenuItem, 0);
                         } else {
+                            //create new mwnu item
+                            matchedMenuItem = this._createMenuItem(text);
+                            this._historyMenuSection.section.addMenuItem(matchedMenuItem, 0);
+                            this._storeInCache(text, false);
+
+
                             //delete last element when reachiing max size
                             //delete in for loop in case of starting with a file containings more items than max size
-                            if (menuItems.length >= _historySizeMax-1) {
-                                for (let index = _historySizeMax-1; index < menuItems.length; index++) {
+                            if (menuItems.length >= _historySize-1) {                               
+                                for (let index = _historySize-1; index < menuItems.length; index++) {
                                     this._removeFromCache(menuItems[index].text);
                                     this._destroyMenuItem(menuItems[index]);
                                 }
                             }
-                            
-                            matchedMenuItem = this._createMenuItem(text);
-                            this._historyMenuSection.section.addMenuItem(matchedMenuItem, 0);
-                            this._storeInCache(text, false);
                         }
                     }
                 } else {
