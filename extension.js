@@ -418,7 +418,7 @@ const PanelIndicator = GObject.registerClass(
                         if (matchedMenuItem) {
                             this._historyMenuSection.section.moveMenuItem(matchedMenuItem, 0);
                         } else {
-                            //create new mwnu item
+                            //create new menu item
                             matchedMenuItem = this._createMenuItem(text);
                             this._historyMenuSection.section.addMenuItem(matchedMenuItem, 0);
                             this._storeInCache(text, false);
