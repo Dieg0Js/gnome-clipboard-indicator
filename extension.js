@@ -81,9 +81,8 @@ const ClipboardManager = GObject.registerClass(
                 St.ClipboardType.CLIPBOARD
             );
             const hasSensitiveMimeTypes = sensitiveMimeTypes.some(
-                (sensitiveMimeType) => {
-                    return mimeTypes.includes(sensitiveMimeType);
-                }
+                (sensitiveMimeType) => 
+                     mimeTypes.includes(sensitiveMimeType)
             );
             if (hasSensitiveMimeTypes) {
                 callback(null);
@@ -380,9 +379,9 @@ const PanelIndicator = GObject.registerClass(
                 this._clipboard.getText((text) => {
                     if (text && text.length > 0) {
                         const menuItems = this._historyMenuSection.section._getMenuItems();
-                        this._currentMenuItem = menuItems.find((menuItem) => {
-                            return menuItem.text === text;
-                        });
+                       this._currentMenuItem = menuItems.find((menuItem) => 
+                             menuItem.text === text
+                        );
                         this._currentMenuItem?.setOrnament(PopupMenu.Ornament.DOT);
                     }
                 });
@@ -393,9 +392,9 @@ const PanelIndicator = GObject.registerClass(
 
         _saveState() {
             const menuItems = this._historyMenuSection.section._getMenuItems();
-            panelIndicator.state.history = menuItems.map((menuItem) => {
-                return menuItem.text;
-            });
+            panelIndicator.state.history = menuItems.map((menuItem) => 
+                 menuItem.text
+            );
         }
 
         _updateUi() {
