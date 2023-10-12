@@ -32,6 +32,19 @@ const cache_file_path = GLib.get_user_cache_dir() + "/" + Extension.uuid + "/dat
 
 const sensitiveMimeTypes = ["x-kde-passwordManagerHint"];
 
+class Translate{
+    translate(string){
+        /* 
+        This function is supposed to use gettext to translate. 
+        Unfortunatly, my only goal right now is to get this ported to gnome 45.
+        I assumed that "class Translate extends Extension" and then return _(string); would work, but i got an error.
+        */
+        return string;
+    }
+}
+
+const translater = new Translate();
+
 const ClipboardManager = GObject.registerClass(
     {
         Signals: {
@@ -221,7 +234,7 @@ const PanelIndicator = GObject.registerClass(
 
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-            this._clearMenuItem = new PopupMenu.PopupMenuItem(_("Clear"));
+            this._clearMenuItem = new PopupMenu.PopupMenuItem(translater.translate("Clear"));
             this._clearMenuItem.connect("activate", () => {
                 this.menu.close();
                 if (this._currentMenuItem) {
@@ -438,8 +451,8 @@ const PanelIndicator = GObject.registerClass(
                     }
                 } else {
                     Main.notifyError(
-                        _("Clipboard Indicator"),
-                        _(
+                        translater.translate("Clipboard Indicator"),
+                        translater.translate(
                             "Can't save clipboard item, illegal chars found '" +
                             _splitter +
                             "'"
