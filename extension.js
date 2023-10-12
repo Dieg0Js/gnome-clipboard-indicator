@@ -8,17 +8,19 @@
 
 "use strict";
 
-const { Clutter, Cogl, Gio, GLib, GObject, Meta, Pango, Shell, St } =
-    imports.gi;
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Pango from 'gi://Pango';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Gettext = imports.gettext;
-const Main = imports.ui.main;
-const ModalDialog = imports.ui.modalDialog;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const Me = ExtensionUtils.getCurrentExtension();
-const _ = Gettext.domain(Me.uuid).gettext;
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 //custom splitter used to separate strings in database file
 //if part of clipboard content could cause errors
@@ -26,7 +28,7 @@ const _splitter = "#+#-#+#";
 
 const _historySize = 15;
 
-const cache_file_path = GLib.get_user_cache_dir() + "/" + Me.uuid + "/database";
+const cache_file_path = GLib.get_user_cache_dir() + "/" + Extension.uuid + "/database";
 
 const sensitiveMimeTypes = ["x-kde-passwordManagerHint"];
 
@@ -461,16 +463,13 @@ const panelIndicator = {
     },
 };
 
-function init() {
-    ExtensionUtils.initTranslations(Me.uuid);
-}
-
-function enable() {
-    panelIndicator.instance = new PanelIndicator();
-    Main.panel.addToStatusArea(`${Me.metadata.name}`, panelIndicator.instance);
-}
-
-function disable() {
-    panelIndicator.instance.destroy();
-    panelIndicator.instance = null;
+export default class ThisCurrentExtension{
+    enable(){
+        panelIndicator.instance = new PanelIndicator();
+        Main.panel.addToStatusArea(`${Extension.name}`, panelIndicator.instance);
+    }
+    disable(){
+        panelIndicator.instance.destroy();
+        panelIndicator.instance = null;
+    }
 }
