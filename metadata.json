@@ -5,7 +5,8 @@
   "original-authors": "Dieg0Js",
   "url": "https://github.com/Dieg0Js/gnome-clipboard-indicator",
   "shell-version": [
-    "45"
+    "45",
+    "46"
   ],
   "version": 5,
   "gettext-domain": "clipboard-indicator@Dieg0Js.github.io"

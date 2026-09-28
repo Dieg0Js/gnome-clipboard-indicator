@@ -141,9 +141,9 @@ const PlaceholderMenuItem = class extends PopupMenu.PopupMenuSection {
             vertical: true,
             x_expand: true,
         });
-        boxLayout.add(this._icon);
-        boxLayout.add(this._label);
-        this.actor.add(boxLayout);
+        boxLayout.add_child(this._icon);
+        boxLayout.add_child(this._label);
+        this.actor.add_child(boxLayout);
     }
 
     setIcon(icon) {
@@ -164,14 +164,14 @@ const HistoryMenuSection = class extends PopupMenu.PopupMenuSection {
             overlay_scrollbars: true,
             style_class: "popuphistorymenusection",
         });
-        this.scrollView.add_actor(this.section.actor);
+        this.scrollView.add_child(this.section.actor);
         const menuSection = new PopupMenu.PopupMenuSection();
-        menuSection.actor.add_actor(this.scrollView);
+        menuSection.actor.add_child(this.scrollView);
         this.addMenuItem(menuSection);
     }
 
     destroy() {
-        this.section.box.disconnect(this._sectionActorRemovedId);
+        super.destroy();
     }
 };
 
@@ -201,6 +201,9 @@ const PanelIndicator = GObject.registerClass(
             this._saveState();
 
             this._historyMenuSection.section.box.disconnect(
+                this._historySectionActorAddedId
+            );
+            this._historyMenuSection.section.box.disconnect(
                 this._historySectionActorRemovedId
             );
             this._historyMenuSection.destroy();
@@ -221,13 +224,14 @@ const PanelIndicator = GObject.registerClass(
 
         _buildMenu() {
             this._historyMenuSection = new HistoryMenuSection();
-            this._historyMenuSection.section.box.connect(
-                "actor-added",
-                this._updateUi.bind(this)
-            );
+            this._historySectionActorAddedId =
+                this._historyMenuSection.section.box.connect(
+                    "child-added",
+                    this._updateUi.bind(this)
+                );
             this._historySectionActorRemovedId =
                 this._historyMenuSection.section.box.connect(
-                    "actor-removed",
+                    "child-removed",
                     this._updateUi.bind(this)
                 );
             this.menu.addMenuItem(this._historyMenuSection);
@@ -249,7 +253,7 @@ const PanelIndicator = GObject.registerClass(
 
             this.menu.connect("open-state-changed", (...[, open]) => {
                 if (open) {
-                    this._historyMenuSection.scrollView.vscroll.adjustment.value = 0;
+                    this._historyMenuSection.scrollView.vadjustment.value = 0;
                     // this._historyMenuSection.entry.text = '';
                     // Promise.resolve().then(() => {
                     //     global.stage.set_key_focus(this._historyMenuSection.entry);
@@ -371,8 +375,8 @@ const PanelIndicator = GObject.registerClass(
                 x_align: Clutter.ActorAlign.END,
                 x_expand: true,
             });
-            boxLayout.add(deleteButton);
-            menuItem.actor.add(boxLayout);
+            boxLayout.add_child(deleteButton);
+            menuItem.actor.add_child(boxLayout);
 
             return menuItem;
         }
