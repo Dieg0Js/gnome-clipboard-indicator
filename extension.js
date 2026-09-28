@@ -18,6 +18,7 @@ import Shell from 'gi://Shell';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as ModalDialog from 'resource:///org/gnome/shell/ui/modalDialog.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
@@ -27,6 +28,15 @@ import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/ex
 const _splitter = "#+#-#+#";
 
 const _historySize = 15;
+const _previewLength = 60;
+
+//collapse whitespace and newlines into a single line and cut long text
+function _previewText(text) {
+    const oneLine = text.replace(/\s+/g, " ").trim();
+    return oneLine.length > _previewLength
+        ? `${oneLine.slice(0, _previewLength)}…`
+        : oneLine;
+}
 
 const cache_file_path = GLib.get_user_cache_dir() + "/" + Extension.uuid + "/database";
 
@@ -141,9 +151,9 @@ const PlaceholderMenuItem = class extends PopupMenu.PopupMenuSection {
             vertical: true,
             x_expand: true,
         });
-        boxLayout.add(this._icon);
-        boxLayout.add(this._label);
-        this.actor.add(boxLayout);
+        boxLayout.add_child(this._icon);
+        boxLayout.add_child(this._label);
+        this.actor.add_child(boxLayout);
     }
 
     setIcon(icon) {
@@ -164,14 +174,14 @@ const HistoryMenuSection = class extends PopupMenu.PopupMenuSection {
             overlay_scrollbars: true,
             style_class: "popuphistorymenusection",
         });
-        this.scrollView.add_actor(this.section.actor);
+        this.scrollView.add_child(this.section.actor);
         const menuSection = new PopupMenu.PopupMenuSection();
-        menuSection.actor.add_actor(this.scrollView);
+        menuSection.actor.add_child(this.scrollView);
         this.addMenuItem(menuSection);
     }
 
     destroy() {
-        this.section.box.disconnect(this._sectionActorRemovedId);
+        super.destroy();
     }
 };
 
@@ -201,6 +211,9 @@ const PanelIndicator = GObject.registerClass(
             this._saveState();
 
             this._historyMenuSection.section.box.disconnect(
+                this._historySectionActorAddedId
+            );
+            this._historyMenuSection.section.box.disconnect(
                 this._historySectionActorRemovedId
             );
             this._historyMenuSection.destroy();
@@ -221,18 +234,25 @@ const PanelIndicator = GObject.registerClass(
 
         _buildMenu() {
             this._historyMenuSection = new HistoryMenuSection();
-            this._historyMenuSection.section.box.connect(
-                "actor-added",
-                this._updateUi.bind(this)
-            );
+            this._historySectionActorAddedId =
+                this._historyMenuSection.section.box.connect(
+                    "child-added",
+                    this._updateUi.bind(this)
+                );
             this._historySectionActorRemovedId =
                 this._historyMenuSection.section.box.connect(
-                    "actor-removed",
+                    "child-removed",
                     this._updateUi.bind(this)
                 );
             this.menu.addMenuItem(this._historyMenuSection);
 
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+            this._showAllMenuItem = new PopupMenu.PopupMenuItem(translater.translate("Show all"));
+            this._showAllMenuItem.connect("activate", () => {
+                this._showAllHistory();
+            });
+            this.menu.addMenuItem(this._showAllMenuItem);
 
             this._clearMenuItem = new PopupMenu.PopupMenuItem(translater.translate("Clear"));
             this._clearMenuItem.connect("activate", () => {
@@ -249,7 +269,7 @@ const PanelIndicator = GObject.registerClass(
 
             this.menu.connect("open-state-changed", (...[, open]) => {
                 if (open) {
-                    this._historyMenuSection.scrollView.vscroll.adjustment.value = 0;
+                    this._historyMenuSection.scrollView.vadjustment.value = 0;
                     // this._historyMenuSection.entry.text = '';
                     // Promise.resolve().then(() => {
                     //     global.stage.set_key_focus(this._historyMenuSection.entry);
@@ -333,7 +353,7 @@ const PanelIndicator = GObject.registerClass(
         }
 
         _createMenuItem(text) {
-            const menuItem = new PopupMenu.PopupMenuItem(text);
+            const menuItem = new PopupMenu.PopupMenuItem(_previewText(text));
             menuItem.text = text;
             menuItem.label.clutter_text.ellipsize = Pango.EllipsizeMode.END;
             menuItem.connect("activate", () => {
@@ -345,6 +365,19 @@ const PanelIndicator = GObject.registerClass(
                 if (this._currentMenuItem === menuItem) {
                     this._currentMenuItem = null;
                 }
+            });
+
+            const viewIcon = new St.Icon({
+                gicon: new Gio.ThemedIcon({ name: "view-fullscreen-symbolic" }),
+                style_class: "system-status-icon",
+            });
+            const viewButton = new St.Button({
+                can_focus: true,
+                child: viewIcon,
+                style_class: "toolbutton",
+            });
+            viewButton.connect("clicked", () => {
+                this._showFullText(menuItem.text);
             });
 
             const deleteIcon = new St.Icon({
@@ -371,10 +404,105 @@ const PanelIndicator = GObject.registerClass(
                 x_align: Clutter.ActorAlign.END,
                 x_expand: true,
             });
-            boxLayout.add(deleteButton);
-            menuItem.actor.add(boxLayout);
+            boxLayout.add_child(viewButton);
+            boxLayout.add_child(deleteButton);
+            menuItem.actor.add_child(boxLayout);
 
             return menuItem;
+        }
+
+        _createTextDialog(contentBox) {
+            const dialog = new ModalDialog.ModalDialog({
+                destroyOnClose: true,
+                styleClass: "clipboard-full-dialog",
+            });
+
+            const scrollView = new St.ScrollView({
+                overlay_scrollbars: true,
+                style_class: "clipboard-full-scroll",
+                x_expand: true,
+                y_expand: true,
+            });
+            scrollView.add_child(contentBox);
+            dialog.contentLayout.add_child(scrollView);
+
+            return dialog;
+        }
+
+        _createFullTextLabel(text) {
+            const label = new St.Label({
+                text,
+                style_class: "clipboard-full-text",
+                x_expand: true,
+            });
+            label.clutter_text.line_wrap = true;
+            label.clutter_text.line_wrap_mode = Pango.WrapMode.WORD_CHAR;
+            label.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
+            return label;
+        }
+
+        _closeButton(dialog) {
+            return {
+                label: translater.translate("Close"),
+                action: () => dialog.close(),
+                default: true,
+                key: Clutter.KEY_Escape,
+            };
+        }
+
+        _copyAndClose(text, dialog) {
+            this._clipboard.setText(text);
+            this._storeInCache(text, true);
+            dialog.close();
+        }
+
+        _showFullText(text) {
+            this.menu.close();
+
+            const box = new St.BoxLayout({ vertical: true });
+            box.add_child(this._createFullTextLabel(text));
+
+            const dialog = this._createTextDialog(box);
+            dialog.setButtons([
+                {
+                    label: translater.translate("Copy"),
+                    action: () => this._copyAndClose(text, dialog),
+                },
+                this._closeButton(dialog),
+            ]);
+            dialog.open();
+        }
+
+        _showAllHistory() {
+            this.menu.close();
+
+            const box = new St.BoxLayout({
+                vertical: true,
+                style_class: "clipboard-full-list",
+            });
+            const dialog = this._createTextDialog(box);
+
+            this._historyMenuSection.section._getMenuItems().forEach((menuItem) => {
+                const text = menuItem.text;
+                const entry = new St.BoxLayout({
+                    vertical: true,
+                    style_class: "clipboard-full-entry",
+                });
+                entry.add_child(this._createFullTextLabel(text));
+
+                const copyButton = new St.Button({
+                    label: translater.translate("Copy"),
+                    can_focus: true,
+                    style_class: "button clipboard-full-copy",
+                    x_align: Clutter.ActorAlign.END,
+                });
+                copyButton.connect("clicked", () => this._copyAndClose(text, dialog));
+                entry.add_child(copyButton);
+                box.add_child(entry);
+            });
+
+            dialog.setButtons([this._closeButton(dialog)]);
+            dialog.open();
         }
 
         _destroyMenuItem(menuItem) {

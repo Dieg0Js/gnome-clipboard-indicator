@@ -8,6 +8,8 @@ It allows you to:
 
 - VIEW copied items history (default last 15)
 - SELECT items and set as current clipboard content (Click on item)
+- VIEW the full text of an item in a dialog (expand button)
+- VIEW the full text of every item at once (Show all)
 - DELETE items from history (X button)
 - CLEAR items history (Clear button)
 
