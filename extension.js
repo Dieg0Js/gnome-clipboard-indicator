@@ -27,6 +27,15 @@ import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/ex
 const _splitter = "#+#-#+#";
 
 const _historySize = 15;
+const _previewLength = 60;
+
+//collapse whitespace and newlines into a single line and cut long text
+function _previewText(text) {
+    const oneLine = text.replace(/\s+/g, " ").trim();
+    return oneLine.length > _previewLength
+        ? `${oneLine.slice(0, _previewLength)}…`
+        : oneLine;
+}
 
 const cache_file_path = GLib.get_user_cache_dir() + "/" + Extension.uuid + "/database";
 
@@ -337,7 +346,7 @@ const PanelIndicator = GObject.registerClass(
         }
 
         _createMenuItem(text) {
-            const menuItem = new PopupMenu.PopupMenuItem(text);
+            const menuItem = new PopupMenu.PopupMenuItem(_previewText(text));
             menuItem.text = text;
             menuItem.label.clutter_text.ellipsize = Pango.EllipsizeMode.END;
             menuItem.connect("activate", () => {
